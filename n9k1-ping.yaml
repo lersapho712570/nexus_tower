@@ -1,0 +1,9 @@
+- name: N9K1 - Ping GW
+  hosts: N9K1
+  tags: n9k1
+  gather_facts: False
+  tasks:
+    - name: N9K1 Ping GW
+      cisco.nxos.nxos_ping:
+        dest: 172.31.1.1
+        vrf: management

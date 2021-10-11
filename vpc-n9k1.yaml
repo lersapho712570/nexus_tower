@@ -1,0 +1,106 @@
+---
+- name: Connectivity Check Cisco Nexus
+  hosts: N9K1
+  tags: Play1
+  tasks:
+    - name: Nexus - Ping GW
+      cisco.nxos.nxos_ping:
+        dest: 172.31.1.1
+        vrf: management
+
+    - name: Enable LACP
+      cisco.nxos.nxos_feature:
+        feature: lacp
+        state: enabled
+
+    - name: Enable interface-vlan
+      cisco.nxos.nxos_feature:
+        feature: interface-vlan
+        state: enabled
+
+    - name: Enable vPC
+      cisco.nxos.nxos_feature:
+        feature: vpc
+        state: enabled
+
+    - name: Create VLAN 50 WEBSRV
+      cisco.nxos.nxos_vlans:
+        config:
+          - vlan_id: 50
+            name: WEBSRV
+            enabled: true
+            state: active
+          - vlan_id: 10
+            name: DB
+          - vlan_id: 20
+            name: APP
+
+- name: vPC N9K1
+  hosts: N9K1
+  tags: vpc_n9k1
+  tasks:
+    - name: Nexus - Ping GW
+      cisco.nxos.nxos_ping:
+        dest: 172.31.1.1
+        vrf: management
+
+    - name: Configure vPC domamin
+      cisco.nxos.nxos_vpc:
+        domain: 100
+        role_priority: 100
+        pkl_dest: 172.31.1.212
+        pkl_src: 172.31.1.211
+        peer_gw: true
+        auto_recovery: true
+        pkl_vrf: management
+
+    - name: L2 - Eth1/2, Eth1/2
+      cisco.nxos.nxos_l2_interfaces:
+        config:
+          - name: Ethernet1/1
+            trunk:
+              allowed_vlans: 1-4094
+            mode: trunk
+          - name: Ethernet1/2
+            mode: trunk
+            trunk:
+              allowed_vlans: 1-4094
+
+    - name: Interface - Eth1/1, Eth1/2
+      cisco.nxos.nxos_interfaces:
+        config:
+          - name: Ethernet1/1
+            description: " ## To N9K2 Eth1/1"
+          - name: Ethernet1/2
+            description: " ## To N9K2 Eth1/2"
+
+    - name: L2 - Int Po10
+      cisco.nxos.nxos_l2_interfaces:
+        config:
+          - name: port-channel10
+            trunk:
+              allowed_vlans: 1-4094
+            mode: trunk
+
+    - name: Interface - po10
+      cisco.nxos.nxos_interfaces:
+        config:
+          - name: port-channel10
+            description: "## Peer-Link ##"
+
+    - name: Int Po - Po10
+      cisco.nxos.nxos_lag_interfaces:
+        config:
+          - name: port-channel10
+            members:
+              - member: Ethernet1/1
+                mode: active
+              - member: Ethernet1/2
+                mode: active
+        state: merged
+
+    - name: Int Po10 - Peer-Link
+      cisco.nxos.nxos_vpc_interface:
+        portchannel: 10
+        # vpc: 100
+        peer_link: True

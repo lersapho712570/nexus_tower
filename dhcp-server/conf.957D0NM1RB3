@@ -1,0 +1,12 @@
+
+hostname TMGN9K-1
+
+interface mgmt0
+  vrf member management
+  ip address 172.31.1.211/24
+
+
+username champ023 password 5 $5$vEEUzdX1$amhAVFyOMJa4ndwUHCss./wRZYRNKbW6iC.rvww3XV4  role network-admin
+username champ023 sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDO2YRj0Yo4VZ6fbFLtEJOnEMDpfKGQT5rqQnk/4LlEb2ndreI7XJTW6o9hpf0lkqT0G9GmtHqCsOrZfIh7Pe4PLJWqpGnzExBbnB6mRFMJ+WFhkGZDr29zRr9ba2tgo2TWvk/FuLmY6SKpTPoEAKxTV1gykxd88myNfL8iS8UmohX4tUEN22GIPz7eq/gkVaXGOUT1u3mWv93FzVBaUjU8uwqwCg4oBqzOj6AV/Za6lGgD3frkwHoHmQxp+WQRyf3djlYVhugPGUYaW9Ohwa7Q4CxRJ6Lwa5zt9SQqfy839xql2q2IDLE7vAGQhNL1yRKdB5sGH5a2uwwgA4gBMS0f7I23h29Z2RaWWXbKg1W7+/SCxfQgqTQF6yC3XvHfuGvwyRZ/cvQRPc0Kfu3C6kYvNqBC8tRN82DwRpPpT1JTKejR6mGTY5LxT9cP3M5XwuUrrasz1mP/9ArpRqXwSf7Df25akEZDzo2imxbuHJ6sXWUx4hxXg1AzpJom6/zMZ0c= root@DESKTOP-MKHJNHV
+username admin password 5 $5$vEEUzdX1$amhAVFyOMJa4ndwUHCss./wRZYRNKbW6iC.rvww3XV4
+

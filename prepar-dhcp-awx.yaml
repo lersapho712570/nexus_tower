@@ -1,0 +1,116 @@
+- name: Prepare DHCP
+  hosts: dhcp
+  gather_facts: False
+  tags: dhcp_server
+  tasks:
+    - name: Stop Packetkit
+      service:
+        name: packagekit
+        state: stopped
+    - name: Ping Check
+      ping:
+    - name: Install dhcp Server
+      yum:
+        name: dhcp
+        update_cache: yes
+        state: latest
+        lock_timeout: 180
+    - name: Copy dhcpd configuration
+      copy:
+        src: /var/lib/awx/projects/_12__nexus_project/dhcp-server/dhcpd.conf
+        dest: /etc/dhcp/
+    - name: start dhcp
+      service:
+        name: dhcpd
+        state: restarted
+      notify: complete dhcp
+
+  handlers:
+    # - name: Verify HTTP Service
+    #   uri:
+    #     url: http://{{ ansible_default_ipv4.address }}
+    #     status_code: 200
+    - name: complete dhcp
+      debug:
+        msg: DHCP Server Ready..
+
+- name: Prepare SFTP
+  hosts: dhcp
+  tags: sftp_server
+  gather_facts: False
+  tasks:
+    - name: Ping SFTP
+      ping:
+
+    - name: Instaall tftp, tftp-server, xinetd
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - tftp-server
+        - xinetd
+
+    - name: Copy xinetd configuration
+      copy:
+        src: /var/lib/awx/projects/_12__nexus_project/dhcp-server/tftp
+        dest: /etc/xinetd.d/
+
+    - name: Copy tftp configuration
+      copy:
+        src: /var/lib/awx/projects/_12__nexus_project/dhcp-server/tftp.service
+        dest: /usr/lib/systemd/system/
+
+    - name: Modify Permission for TFTP role_priority
+      file:
+        path: /var/lib/tftpboot/
+        state: directory
+        mode: "777"
+
+    - name: Start tftp
+      service:
+        name: "{{ item }}"
+        state: started
+      with_items:
+        - tftp
+        - xinetd
+      notify: Restarted TFTP
+
+  handlers:
+    - name: Restarted TFTP
+      debug:
+        msg: TFTP Ready
+
+- name: Preparing Nexus Configuration
+  hosts: dhcp
+  gather_facts: False
+  tags: nexus_switch
+  tasks:
+    - name: Nexus switch Configuration
+      copy:
+        src: "/var/lib/awx/projects/_12__nexus_project/dhcp-server/{{ item }}"
+        dest: /var/lib/tftpboot/
+      with_items:
+        - conf.957D0NM1RB3
+        - conf.957D0NM1RB3.md5
+        - conf.9CKVYXJ09SL
+        - conf.9CKVYXJ09SL.md5
+        - poap.py
+        - poap.py.md5
+
+    - name: Nexus switch Image
+      copy:
+        src: "/tmp/NXOS/{{ item }}"
+        dest: /var/lib/tftpboot/
+      with_items:
+        - nxos.9.3.6.bin
+        - nxos.9.3.6.bin.md5
+
+- name: Stop Firewall
+  hosts: dhcp
+  tags: firewall
+  gather_facts: False
+  tasks:
+    - name: Stop Firewall D
+      service:
+        name: firewalld
+        state: stopped

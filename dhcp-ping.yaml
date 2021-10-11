@@ -1,0 +1,7 @@
+- name: Simple Ping
+  hosts: dhcp
+  tags: dhcp
+  gather_facts: False
+  tasks:
+    - name: Ping Check
+      ping:
