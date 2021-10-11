@@ -1,9 +1,0 @@
-[control]
-local ansible_connection=local
-
-
-dhcp ansible_host=172.31.1.54
-
-[nexus]
-N9K1 ansible_host=172.31.1.211
-N9K2 ansible_host=172.31.1.212
